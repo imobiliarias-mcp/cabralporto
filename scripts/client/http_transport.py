@@ -2,7 +2,9 @@
 
 import socket
 from typing import Any
+
 import httpx
+
 from scripts.client.configuration import CabralPortoConfiguration
 from scripts.domain.exceptions import PropertyNotFoundException, RentalDomainException
 
@@ -37,6 +39,10 @@ class CabralPortoHttpTransport:
         """Apply monkeypatch to socket getaddrinfo if needed."""
         if socket.getaddrinfo is not _forced_ipv4_getaddrinfo:
             socket.getaddrinfo = _forced_ipv4_getaddrinfo
+
+    def public_base_url(self) -> str:
+        """Return configured public property site base URL."""
+        return self._config.public_base_url()
 
     def get_json(self, url: str, params: dict[str, str] | None = None) -> dict[str, Any]:
         """Fetch and parse JSON payload from URL with optional query parameters."""

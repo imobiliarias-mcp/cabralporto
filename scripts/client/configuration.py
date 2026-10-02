@@ -11,6 +11,10 @@ class CabralPortoConfiguration:
     base_url: str = "https://cabralportoimoveis.com.br"
     api_base_url: str = "https://api-sites.tecimob.com.br/api"
 
+    def public_base_url(self) -> str:
+        """Return configured public property site base URL."""
+        return self.base_url.rstrip("/")
+
     def origin_header_value(self) -> str:
         """Return canonical portal origin."""
         return f"https://{self.base_hostname}"

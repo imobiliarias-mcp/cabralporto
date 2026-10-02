@@ -1,6 +1,7 @@
 """Unit tests for domain value objects, criteria, and entities."""
 
 import pytest
+
 from cabralporto_research.domain.criteria import SearchCriteria
 from cabralporto_research.domain.enums import PropertyType, SortOrder, TransactionType
 from cabralporto_research.domain.listing import (
@@ -10,9 +11,19 @@ from cabralporto_research.domain.listing import (
     RentalListingCollection,
     RentalListingSummary,
 )
-from cabralporto_research.domain.metadata import City, FacetCollection, Neighborhood, PropertyTypeItem
-from cabralporto_research.domain.property import PhotoGallery, PhotoItem, PropertyDetail, PropertyPricing
-from cabralporto_research.domain.values import AreaRange, PageNumber, PriceRange, PropertyCode, RoomCount
+from cabralporto_research.domain.metadata import (
+    City,
+    FacetCollection,
+    Neighborhood,
+    PropertyTypeItem,
+)
+from cabralporto_research.domain.values import (
+    AreaRange,
+    PageNumber,
+    PriceRange,
+    PropertyCode,
+    RoomCount,
+)
 
 
 def test_price_range_validation_and_parameters() -> None:
@@ -125,6 +136,25 @@ def test_listing_collection_operations() -> None:
     dictionary_list = collection.to_list()
     assert len(dictionary_list) == 1
     assert dictionary_list[0]["reference"] == "422"
+
+
+@pytest.mark.parametrize("detail_url", ["", "/imovel/apartamento/422", "ftp://example.test/imovel/422"])
+def test_listing_serializer_rejects_missing_or_relative_public_url(detail_url: str) -> None:
+    """Reject an unresolved public URL when a listing is manually constructed."""
+    listing = RentalListingSummary(
+        property_id="uuid-1",
+        reference="422",
+        title="Apartamento em Eldorado",
+        price="R$ 1.400,00",
+        transaction="ALUGUEL",
+        location=ListingLocation(neighborhood="Eldorado", city="Timóteo", formatted="Eldorado - Timóteo/MG"),
+        specs=ListingSpecs(),
+        thumbnail_url=None,
+        detail_url=detail_url,
+    )
+
+    with pytest.raises(ValueError, match="422"):
+        listing.to_dictionary()
 
 
 def test_facet_collection_lookup() -> None:

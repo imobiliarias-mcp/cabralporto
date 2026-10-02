@@ -37,6 +37,7 @@ def main() -> None:
     for item in results:
         specs_desc = f"{item.specs.bedrooms} dorms" if item.specs.bedrooms else "Sem dormitórios"
         print(f"  [{item.reference}] {item.title[:45]:<45} | {item.price:>12} | {item.location.neighborhood} ({specs_desc})")
+        print(f"  Link: {item.detail_url}")
 
     # 2. All Timóteo Rental Listings
     print("\n--- 2. All Timóteo Rental Listings Search ---")
@@ -44,6 +45,7 @@ def main() -> None:
     print(f"Total rental listings in Timóteo: {all_rentals.total_count}")
     for item in all_rentals:
         print(f"  [{item.reference}] {item.title[:45]:<45} | {item.price:>12} | {item.location.neighborhood}")
+        print(f"  Link: {item.detail_url}")
 
     # 3. Property Detail Retrieval (Apartment Ref 422)
     print("\n--- 3. Property Detail Retrieval (Apartment Ref 422) ---")

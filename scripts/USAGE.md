@@ -19,6 +19,7 @@ print(f"Total found: {search_result.total_count()}")
 
 for listing in search_result.listings():
     print(listing.format_summary())
+    print("Public property URL:", listing.to_dictionary()["url"])
 ```
 
 ### 1.2 Filtered Search (Target Prompt Equivalent)

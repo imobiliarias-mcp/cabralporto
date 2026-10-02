@@ -2,7 +2,10 @@
 
 from cabralporto_research.parsers.detail_parser import PropertyDetailParser
 from cabralporto_research.parsers.metadata_parser import MetadataParser
-from cabralporto_research.parsers.search_parser import SearchResponseParser
+from cabralporto_research.parsers.search_parser import (
+    ListingItemParser,
+    SearchResponseParser,
+)
 
 
 def test_search_response_parser() -> None:
@@ -67,26 +70,16 @@ def test_search_response_parser() -> None:
     assert "cabralportoimoveis.com.br/imovel" in item.detail_url
 
 
-def test_search_response_parser_empty_or_no_rooms() -> None:
-    """Verify search parser handles properties with empty rooms list gracefully."""
-    sample_json = {
-        "data": [
-            {
-                "id": "uuid-comm",
-                "reference": "258",
-                "title_formatted": "Loja Centro",
-                "price": "R$1.700,00",
-                "rooms": [],
-                "images_extra": [],
-            }
-        ]
-    }
-    parser = SearchResponseParser()
-    collection = parser.parse(sample_json)
-    assert len(collection) == 1
-    item = collection[0]
-    assert item.specs.bedrooms is None
-    assert item.thumbnail_url is None
+def test_listing_item_parser_handles_empty_rooms_without_property_url() -> None:
+    """Verify empty room data remains safe without inventing a missing link."""
+    parser = ListingItemParser()
+    item = {"rooms": [], "images_extra": []}
+
+    specs = parser._extract_specs(item)
+    thumbnail_url = parser._extract_thumbnail(item)
+
+    assert specs.bedrooms is None
+    assert thumbnail_url is None
 
 
 def test_property_detail_parser() -> None:

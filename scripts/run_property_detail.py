@@ -28,7 +28,9 @@ def display_detail(detail) -> None:
     formatted = detail.format_detailed_view()
     print(formatted)
     print("-" * 75)
-    print(f"Foto Principal: {detail.listing.details.media_url}")
+    listing_data = detail.listing.to_dictionary()
+    print(f"Link: {listing_data['url']}")
+    print(f"Foto Principal: {listing_data['media_url']}")
     print("=" * 75 + "\n")
 
 

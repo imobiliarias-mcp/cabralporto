@@ -1,6 +1,25 @@
 """Domain models and collections for rental listing search results."""
 
 from dataclasses import dataclass
+from urllib.parse import urlsplit
+
+
+def _validated_public_url(property_url: str, property_context: str) -> str:
+    """Require an absolute public HTTP(S) URL without embedded credentials."""
+    try:
+        parts = urlsplit(property_url)
+        hostname = parts.hostname
+    except ValueError as error:
+        raise ValueError(f"Invalid public property URL for '{property_context}'.") from error
+    if (
+        property_url != property_url.strip()
+        or parts.scheme.lower() not in {"http", "https"}
+        or not hostname
+        or parts.username
+        or parts.password
+    ):
+        raise ValueError(f"Invalid public property URL for '{property_context}'.")
+    return property_url
 
 
 @dataclass(frozen=True)
@@ -56,19 +75,22 @@ class RentalListingSummary:
     detail_url: str
 
     def to_dictionary(self) -> dict:
-        """Convert listing summary to standard serializable dictionary."""
-        d = {
+        """Convert a listing summary with a valid absolute public URL."""
+        property_context = self.reference or self.property_id or "unknown"
+        public_url = _validated_public_url(self.detail_url, property_context)
+        listing_dictionary = {
             "property_id": self.property_id,
             "reference": self.reference,
             "title": self.title,
             "price": self.price,
             "transaction": self.transaction,
             "thumbnail_url": self.thumbnail_url,
-            "detail_url": self.detail_url,
+            "detail_url": public_url,
+            "url": public_url,
         }
-        d.update(self.location.to_dictionary())
-        d.update(self.specs.to_dictionary())
-        return d
+        listing_dictionary.update(self.location.to_dictionary())
+        listing_dictionary.update(self.specs.to_dictionary())
+        return listing_dictionary
 
 
 @dataclass(frozen=True)

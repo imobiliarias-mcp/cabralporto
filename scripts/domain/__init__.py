@@ -1,6 +1,10 @@
 """Domain package exports for scripts layer."""
 
-from scripts.domain.collections import FacetCollection, RentalListingCollection, RentalSearchResult
+from scripts.domain.collections import (
+    FacetCollection,
+    RentalListingCollection,
+    RentalSearchResult,
+)
 from scripts.domain.criteria import (
     LocationCriteria,
     PriceRange,
@@ -39,6 +43,7 @@ __all__ = [
     "ListingDetails",
     "ListingIdentity",
     "ListingPrice",
+    "ListingResources",
     "ListingValuation",
     "LocationCriteria",
     "PriceRange",

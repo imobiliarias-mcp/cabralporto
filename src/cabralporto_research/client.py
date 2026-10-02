@@ -18,7 +18,9 @@ class CabralPortoRentalClient:
     ) -> None:
         """Initialize client with gateway and parser suite collaborators."""
         self._gateway = gateway or RentalNetworkGateway()
-        self._parsers = parsers or RentalParserSuite()
+        self._parsers = parsers or RentalParserSuite(
+            public_base_url=self._gateway.public_site_base_url()
+        )
 
     def search(self, criteria: SearchCriteria) -> RentalListingCollection:
         """Execute search query and return parsed collection of listings."""

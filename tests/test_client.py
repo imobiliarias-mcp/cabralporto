@@ -1,11 +1,15 @@
 """Unit tests for CabralPortoRentalClient with stubbed network transport."""
 
 import pytest
+
 from cabralporto_research.client import CabralPortoRentalClient
-from cabralporto_research.collaborators import RentalNetworkGateway, RentalParserSuite
+from cabralporto_research.collaborators import RentalNetworkGateway
 from cabralporto_research.domain.criteria import SearchCriteria
 from cabralporto_research.domain.enums import PropertyType
-from cabralporto_research.infrastructure.http_client import HttpResponse, PropertyNotFoundError
+from cabralporto_research.infrastructure.http_client import (
+    HttpResponse,
+    PropertyNotFoundError,
+)
 
 
 class StubHttpClient:
@@ -82,6 +86,7 @@ class StubHttpClient:
                         "title_formatted": "Apartamento em Eldorado",
                         "price": "R$1.400,00",
                         "transaction": "ALUGUEL",
+                        "url": "/imovel/apartamento-para-alugar-no-bairro-eldorado-em-timoteo-mg/422",
                         "address": {"formatted": "Eldorado - Timóteo/MG"},
                         "rooms": {"bedroom": {"value": 2}},
                     }

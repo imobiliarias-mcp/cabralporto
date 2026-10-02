@@ -1,6 +1,7 @@
 """Canonical URL and API query parameter constructor."""
 
 from urllib.parse import urlencode
+
 from cabralporto_research.domain.criteria import SearchCriteria
 from cabralporto_research.domain.enums import PropertyType
 
@@ -15,6 +16,10 @@ class UrlBuilder:
         """Initialize builder with API and website base URLs."""
         self._api_base = api_base.rstrip("/")
         self._site_base = site_base.rstrip("/")
+
+    def public_site_base_url(self) -> str:
+        """Return configured public portal base URL for resolving listing links."""
+        return self._site_base
 
     def build_api_search_url(self) -> str:
         """Return base API properties endpoint."""

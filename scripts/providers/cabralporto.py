@@ -1,6 +1,7 @@
 """Cabral Porto Imóveis rental search provider implementation."""
 
 import httpx
+
 from scripts.client.configuration import CabralPortoConfiguration
 from scripts.client.http_transport import CabralPortoHttpTransport
 from scripts.client.parsers import ResponseParser
@@ -42,14 +43,14 @@ class CabralPortoRentalProvider(RentalProviderProtocol):
         search_url = self._builder.build_api_search_url()
         params = self._builder.build_api_parameters(search_filter)
         json_data = self._transport.get_json(search_url, params=params)
-        parser = ResponseParser()
+        parser = ResponseParser(public_base_url=self._transport.public_base_url())
         return parser.parse_search_json(json_data)
 
     def get_property_detail(self, code: PropertyCode) -> RentalPropertyDetail:
         """Retrieve full details for a single property by code."""
         detail_url = self._builder.build_api_detail_url(code)
         json_data = self._transport.get_json(detail_url)
-        parser = ResponseParser()
+        parser = ResponseParser(public_base_url=self._transport.public_base_url())
         return parser.parse_detail_json(json_data)
 
     def get_facets(self) -> FacetCollection:

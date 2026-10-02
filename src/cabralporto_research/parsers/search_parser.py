@@ -1,6 +1,7 @@
 """Parser for property search JSON payloads."""
 
 from typing import Any
+
 from cabralporto_research.domain.listing import (
     ListingLocation,
     ListingSpecs,
@@ -8,12 +9,17 @@ from cabralporto_research.domain.listing import (
     RentalListingCollection,
     RentalListingSummary,
 )
+from cabralporto_research.parsers.public_url import PublicPropertyUrlResolver
 
 
 class ListingItemParser:
     """Parses individual listing item payloads."""
 
     BASE_SITE_URL = "https://cabralportoimoveis.com.br"
+
+    def __init__(self, public_base_url: str = BASE_SITE_URL) -> None:
+        """Initialize URL resolution with the configured public site base."""
+        self._url_resolver = PublicPropertyUrlResolver(public_base_url)
 
     def parse_item(self, item: dict[str, Any]) -> RentalListingSummary:
         """Extract a single listing summary from property data dictionary."""
@@ -84,17 +90,21 @@ class ListingItemParser:
         return None
 
     def _extract_detail_url(self, item: dict[str, Any]) -> str:
-        """Build canonical property detail URL."""
-        slug = item.get("url") or f"imovel/{item.get('reference', '')}"
-        return f"{self.BASE_SITE_URL}/imovel/{slug}"
+        """Resolve a public detail URL carried by the API card."""
+        context = str(item.get("reference") or item.get("id") or "unknown")
+        return self._url_resolver.resolve(item.get("url"), context)
 
 
 class SearchResponseParser:
     """Parses JSON responses from Tecimob /properties endpoint."""
 
-    def __init__(self, item_parser: ListingItemParser | None = None) -> None:
-        """Initialize with item parser collaborator."""
-        self._item_parser = item_parser or ListingItemParser()
+    def __init__(
+        self,
+        item_parser: ListingItemParser | None = None,
+        public_base_url: str = ListingItemParser.BASE_SITE_URL,
+    ) -> None:
+        """Initialize with item parser and public-site URL configuration."""
+        self._item_parser = item_parser or ListingItemParser(public_base_url=public_base_url)
 
     def parse(self, json_data: dict[str, Any] | None) -> RentalListingCollection:
         """Parse JSON response dictionary into RentalListingCollection."""

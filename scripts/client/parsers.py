@@ -2,12 +2,19 @@
 
 import re
 from typing import Any
-from scripts.domain.collections import FacetCollection, RentalListingCollection, RentalSearchResult
+
+from scripts.client.public_urls import PublicPropertyUrlResolver
+from scripts.domain.collections import (
+    FacetCollection,
+    RentalListingCollection,
+    RentalSearchResult,
+)
 from scripts.domain.entities import (
     DetailedProfile,
     ListingCore,
     ListingDetails,
     ListingIdentity,
+    ListingResources,
     ListingValuation,
     RentalListing,
     RentalPropertyDetail,
@@ -18,6 +25,12 @@ from scripts.domain.value_objects import ListingPrice, PropertyCode
 class ListingCardParser:
     """Parses individual listing item into domain entity."""
 
+    DEFAULT_PUBLIC_BASE_URL = "https://cabralportoimoveis.com.br"
+
+    def __init__(self, public_base_url: str = DEFAULT_PUBLIC_BASE_URL) -> None:
+        """Initialize public link resolution for listing cards."""
+        self._url_resolver = PublicPropertyUrlResolver(public_base_url)
+
     def parse_single_listing(self, item: dict[str, Any]) -> RentalListing:
         """Convert a single API property item into RentalListing entity."""
         code_str = str(item.get("reference") or item.get("id", ""))
@@ -26,10 +39,12 @@ class ListingCardParser:
         price_val = self._parse_price_float(item.get("price"))
         location = item.get("address", {}).get("formatted") or "Timóteo/MG"
         media_url = self._extract_thumbnail(item)
+        property_url = self._url_resolver.resolve(item.get("url"), code_str)
         identity = ListingIdentity(code=PropertyCode(code_str), title=title)
         val = ListingValuation(rental_price=ListingPrice(price_val), property_type=prop_type)
         core = ListingCore(identity=identity, valuation=val)
-        details = ListingDetails(location_summary=location, media_url=media_url)
+        resources = ListingResources(media_url=media_url, property_url=property_url)
+        details = ListingDetails(location_summary=location, resources=resources)
         return RentalListing(core=core, details=details)
 
     def _parse_price_float(self, raw_price: Any) -> float:
@@ -58,9 +73,13 @@ class ListingCardParser:
 class ResponseParser:
     """Parses Tecimob API JSON payloads into domain collections and details."""
 
-    def __init__(self, listing_parser: ListingCardParser | None = None) -> None:
-        """Initialize with listing item parser collaborator."""
-        self._listing_parser = listing_parser or ListingCardParser()
+    def __init__(
+        self,
+        listing_parser: ListingCardParser | None = None,
+        public_base_url: str = ListingCardParser.DEFAULT_PUBLIC_BASE_URL,
+    ) -> None:
+        """Initialize with listing parser and configured public origin."""
+        self._listing_parser = listing_parser or ListingCardParser(public_base_url=public_base_url)
 
     def parse_search_json(self, json_data: dict[str, Any]) -> RentalSearchResult:
         """Extract rental listings and total count from search API response."""

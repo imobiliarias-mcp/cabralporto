@@ -25,6 +25,10 @@ class RentalNetworkGateway:
         self._http = http_client or HttpxHttpClient()
         self._builder = url_builder or UrlBuilder()
 
+    def public_site_base_url(self) -> str:
+        """Return configured public website base URL."""
+        return self._builder.public_site_base_url()
+
     def fetch_search(self, criteria: SearchCriteria) -> HttpResponse:
         """Fetch search results page for given criteria."""
         url = self._builder.build_api_search_url()
@@ -59,9 +63,13 @@ class RentalNetworkGateway:
 class ListingParserBundle:
     """Aggregates search and metadata parsers."""
 
-    def __init__(self, search_parser: SearchResponseParser | None = None) -> None:
+    def __init__(
+        self,
+        search_parser: SearchResponseParser | None = None,
+        public_base_url: str = "https://cabralportoimoveis.com.br",
+    ) -> None:
         """Initialize search and metadata parsers."""
-        self._search = search_parser or SearchResponseParser()
+        self._search = search_parser or SearchResponseParser(public_base_url=public_base_url)
         self._metadata = MetadataParser()
 
     @property
@@ -95,9 +103,10 @@ class RentalParserSuite:
         self,
         listing_bundle: ListingParserBundle | None = None,
         detail_bundle: DetailParserBundle | None = None,
+        public_base_url: str = "https://cabralportoimoveis.com.br",
     ) -> None:
         """Initialize suite with listing and detail bundles."""
-        self._listing = listing_bundle or ListingParserBundle()
+        self._listing = listing_bundle or ListingParserBundle(public_base_url=public_base_url)
         self._detail = detail_bundle or DetailParserBundle()
 
     @property

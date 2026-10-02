@@ -86,3 +86,21 @@ curl -s "https://api-sites.tecimob.com.br/api/filters/types" \
 | `sort` | `string` | `-created_at,id`, `price`, `-price` | Sorting order. |
 | `offset` | `int` | `1`, `2`, `3`... | Page index (1-indexed). |
 | `limit` | `int` | `1`..`50` (default: `21`) | Page size. |
+
+## 3. Public Property Links
+
+Search payloads provide a public property path in `url`. The client resolves relative and
+protocol-relative links against the configured public site origin and serializes the same
+absolute HTTP(S) destination as both `url` and the legacy `detail_url` field. Valid links
+use the documented `/imovel/...` or `/details/...` property routes; search pages, Tecimob
+API endpoints, media files, and missing links raise a contextual `ValueError`. Search does
+not issue a detail request just to discover a property URL.
+
+Example serialized fields:
+
+```json
+{
+  "url": "https://cabralportoimoveis.com.br/imovel/apartamento-eldorado/422",
+  "detail_url": "https://cabralportoimoveis.com.br/imovel/apartamento-eldorado/422"
+}
+```
