@@ -60,3 +60,13 @@ class CabralPortoMcpAdapter:
         """Retrieve available search facets for an MCP tool call."""
         facets = self._provider.get_facets()
         return facets.to_dictionary()
+
+    def get_provider_info(self) -> dict:
+        """Retrieve metadata about this rental provider adapter."""
+        name = self._provider.provider_name()
+        return {
+            "provider_name": name,
+            "coverage_region": "Timóteo e Vale do Aço",
+            "supported_operations": ["search_rentals", "get_property_detail", "get_facets"],
+        }
+
