@@ -39,6 +39,7 @@ class ListingValuation:
     rental_price: ListingPrice
     property_type: str
     condo_fee: float | None = None
+    iptu: float | None = None
 
 
 @dataclass(frozen=True)
@@ -124,6 +125,7 @@ class RentalListing:
             "rental_price": self.core.valuation.rental_price.value(),
             "rental_price_formatted": self.core.valuation.rental_price.format_brl(),
             "condo_fee": self.core.valuation.condo_fee,
+            "iptu": self.core.valuation.iptu,
             "location": self.details.location_summary,
             **resources,
         }

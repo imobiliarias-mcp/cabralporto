@@ -31,23 +31,30 @@ class ListingCardParser:
         """Initialize public link resolution for listing cards."""
         self._url_resolver = PublicPropertyUrlResolver(public_base_url)
 
-    def parse_single_listing(self, item: dict[str, Any]) -> RentalListing:
-        """Convert a single API property item into RentalListing entity."""
-        code_str = str(item.get("reference") or item.get("id", ""))
-        title = item.get("title_formatted") or f"Imóvel {code_str}"
+    def _build_valuation(self, item: dict[str, Any]) -> ListingValuation:
+        """Construct valuation value object from property item."""
         prop_type = item.get("profile") or "Imóvel"
         price_val = self._parse_price_float(item.get("price"))
         condo_val = self._parse_price_float(item.get("condominium_price"))
         condo_fee = condo_val if condo_val > 0.0 else None
+        tax_val = self._parse_price_float(item.get("total_taxes_price"))
+        iptu_fee = tax_val if tax_val > 0.0 else None
+        return ListingValuation(
+            rental_price=ListingPrice(price_val),
+            property_type=prop_type,
+            condo_fee=condo_fee,
+            iptu=iptu_fee,
+        )
+
+    def parse_single_listing(self, item: dict[str, Any]) -> RentalListing:
+        """Convert a single API property item into RentalListing entity."""
+        code_str = str(item.get("reference") or item.get("id", ""))
+        title = item.get("title_formatted") or f"Imóvel {code_str}"
         location = item.get("address", {}).get("formatted") or "Timóteo/MG"
         media_url = self._extract_thumbnail(item)
         property_url = self._url_resolver.resolve(item.get("url"), code_str)
         identity = ListingIdentity(code=PropertyCode(code_str), title=title)
-        val = ListingValuation(
-            rental_price=ListingPrice(price_val),
-            property_type=prop_type,
-            condo_fee=condo_fee,
-        )
+        val = self._build_valuation(item)
         core = ListingCore(identity=identity, valuation=val)
         resources = ListingResources(media_url=media_url, property_url=property_url)
         details = ListingDetails(location_summary=location, resources=resources)
