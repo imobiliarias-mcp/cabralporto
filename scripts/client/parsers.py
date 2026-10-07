@@ -37,11 +37,17 @@ class ListingCardParser:
         title = item.get("title_formatted") or f"Imóvel {code_str}"
         prop_type = item.get("profile") or "Imóvel"
         price_val = self._parse_price_float(item.get("price"))
+        condo_val = self._parse_price_float(item.get("condominium_price"))
+        condo_fee = condo_val if condo_val > 0.0 else None
         location = item.get("address", {}).get("formatted") or "Timóteo/MG"
         media_url = self._extract_thumbnail(item)
         property_url = self._url_resolver.resolve(item.get("url"), code_str)
         identity = ListingIdentity(code=PropertyCode(code_str), title=title)
-        val = ListingValuation(rental_price=ListingPrice(price_val), property_type=prop_type)
+        val = ListingValuation(
+            rental_price=ListingPrice(price_val),
+            property_type=prop_type,
+            condo_fee=condo_fee,
+        )
         core = ListingCore(identity=identity, valuation=val)
         resources = ListingResources(media_url=media_url, property_url=property_url)
         details = ListingDetails(location_summary=location, resources=resources)

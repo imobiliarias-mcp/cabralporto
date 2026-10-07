@@ -143,6 +143,23 @@ def test_property_detail_parser() -> None:
     assert detail.photos[0].caption == "Sala"
 
 
+def test_scripts_property_detail_parser_extracts_condo_fee() -> None:
+    from scripts.client.parsers import ResponseParser
+    payload = {
+        "data": {
+            "reference": "422",
+            "title_formatted": "Apartamento Eldorado",
+            "price": "R$ 1.400,00",
+            "condominium_price": "R$ 220,00",
+            "url": "https://cabralportoimoveis.com.br/imovel/apartamento/422",
+        }
+    }
+    parser = ResponseParser()
+    detail = parser.parse_detail_json(payload)
+    data = detail.to_dictionary()
+    assert data["condo_fee"] == 220.0
+
+
 def test_metadata_parser() -> None:
     """Verify metadata parser extracts cities, neighborhoods, and types."""
     states_data = {
