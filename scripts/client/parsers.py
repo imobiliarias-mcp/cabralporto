@@ -122,8 +122,26 @@ class ResponseParser:
         base = self._listing_parser.parse_single_listing(d)
         desc = d.get("description", "")
         amenities = self._extract_amenities_summary(d)
-        profile = DetailedProfile(description=desc, amenities_summary=amenities)
+        photos = self._extract_photo_urls(d)
+        profile = DetailedProfile(description=desc, amenities_summary=amenities, photo_urls=photos)
         return RentalPropertyDetail(listing=base, profile=profile)
+
+    def _extract_photo_urls(self, data: dict[str, Any]) -> tuple[str, ...]:
+        """Return one URL per gallery photo, large variant first, without duplicates."""
+        images = data.get("images_extra")
+        if not isinstance(images, list):
+            return ()
+        urls = (self._gallery_photo_url(item) for item in images)
+        return tuple(dict.fromkeys(url for url in urls if url))
+
+    def _gallery_photo_url(self, item: Any) -> str | None:
+        """Return the best available URL of one gallery entry, if it has one."""
+        if not isinstance(item, dict):
+            return None
+        file_url = item.get("file_url")
+        if not isinstance(file_url, dict):
+            return None
+        return file_url.get("large") or file_url.get("medium") or None
 
     def _extract_amenities_summary(self, data: dict[str, Any]) -> str:
         """Build summary string of rooms and amenities."""

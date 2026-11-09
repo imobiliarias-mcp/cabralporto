@@ -137,6 +137,7 @@ class DetailedProfile:
 
     description: str
     amenities_summary: str
+    photo_urls: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -158,4 +159,5 @@ class RentalPropertyDetail:
         base_dict = self.listing.to_dictionary()
         base_dict["amenities"] = self.profile.amenities_summary
         base_dict["description"] = self.profile.description
+        base_dict["photos"] = list(self.profile.photo_urls)
         return base_dict

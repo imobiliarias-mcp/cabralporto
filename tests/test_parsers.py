@@ -214,3 +214,23 @@ def test_metadata_parser() -> None:
     assert facets.neighborhoods[0].name == "Eldorado"
     assert len(facets.types) == 1
     assert facets.types[0].id == "apartamento"
+
+
+def test_scripts_property_detail_exposes_gallery_urls() -> None:
+    from scripts.client.parsers import ResponseParser
+    payload = {
+        "data": {
+            "reference": "428",
+            "title_formatted": "Casa Timirim",
+            "price": "R$ 2.200,00",
+            "url": "https://cabralportoimoveis.com.br/imovel/casa/428",
+            "images_extra": [
+                {"file_url": {"large": "https://cdn.test/1.jpg", "medium": "https://cdn.test/1m.webp"}},
+                {"file_url": {"large": "", "medium": "https://cdn.test/2m.webp"}},
+                {"file_url": {"large": "https://cdn.test/1.jpg", "medium": "https://cdn.test/1m.webp"}},
+                {"caption": "sem arquivo"},
+            ],
+        }
+    }
+    detail = ResponseParser().parse_detail_json(payload)
+    assert detail.to_dictionary()["photos"] == ["https://cdn.test/1.jpg", "https://cdn.test/2m.webp"]
